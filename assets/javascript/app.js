@@ -17,7 +17,8 @@ var player1Choice,
     player1Wins,
     player2Wins,
     numUsers,
-    numPlayers;
+    numPlayers,
+    turn = 1;
 
 // Add ourselves to presence list when online.
 var connectionsRef = database.ref('/connections');
@@ -30,6 +31,7 @@ $(document).ready(function (){
             database.ref().set({
                 turn: 1
             });
+            turn = 1;
         }
     });
 });
@@ -60,7 +62,7 @@ $('#submit-name').on('click', function() {
     event.preventDefault();
 
     var playerName = $('#player-name').val().trim();
-
+console.log('new: ' + numPlayers);
     if(numPlayers < 3) {
         $('#player').html('Hello, ' + playerName + '<br>You are player ' + numPlayers);
 
@@ -71,11 +73,17 @@ $('#submit-name').on('click', function() {
             dateAdded: firebase.database.ServerValue.TIMESTAMP
             
         });
+        if(numPlayers == 2) {
+            $('#choices-1').html('<p class="choice" id="rock">Rock</p><br><p class="choice" id="paper-1">Paper</p><br><p class="choice" id="scissors">Scissors</p>');
+
+            $('#name-2').text('Waiting for player 2');
+        }
+        else if(numPlayers == 3) {
+            $('#choices-2').html('<p class="choice" id="rock">Rock</p><br><p class="choice" id="paper-1">Paper</p><br><p class="choice" id="scissors">Scissors</p>').hide();
+
+            $('#choices-1').text('Waiting for player 1 to play');
+        }
     }
-      
-     
-
-
 
     $('#form-panel').hide();
 });
@@ -87,21 +95,50 @@ database.ref("/players").on("value", function(snapshot) {
         // Set numPlayers to 1
         numPlayers = 1;
     }
-    else if(numPlayers == 1){
-        $('#name-1').text(snapshot.child(numPlayers+'/name').val());
-        $('#wins-1').text('Wins: ' + snapshot.child(numPlayers+'/wins').val());
-        $('#losses-1').text('Losses: ' + snapshot.child(numPlayers+'/losses').val());
-
-        $('#name-2').text('Waiting for player 2');
-
-
-        
+    else if(snapshot.child(1).exists() && !snapshot.child(2).exists()){
+        $('#name-1').text(snapshot.child('1/name').val());
+        $('#wins-1').text('Wins: ' + snapshot.child('1/wins').val());
+        $('#losses-1').text('Losses: ' + snapshot.child('1/losses').val());
         numPlayers++;
+        
     }
-    else {
-        $('#name-2').text(snapshot.child(numPlayers+'/name').val());
-        $('#wins-2').text('Wins: ' + snapshot.child(numPlayers+'/wins').val());
-        $('#losses-2').text('Losses: ' + snapshot.child(numPlayers+'/losses').val());
+    else if(snapshot.child(2).exists()){
+        $('#name-2').text(snapshot.child('2/name').val());
+        $('#wins-2').text('Wins: ' + snapshot.child('2/wins').val());
+        $('#losses-2').text('Losses: ' + snapshot.child('2/losses').val());
+        numPlayers++;
     }
 
 })
+
+$('#choices-' + turn).on('click', ".choice", function () {  
+    console.log($(this).attr('id'));
+
+    database.ref('/players/' + turn).push({
+        choice: $(this).attr('id')
+    });
+
+
+    $('#choices-' + turn).hide();
+    
+
+    if(turn == 1) turn++;
+    else turn--;
+    $('#choices-' + turn).html('Waiting for player ' + turn + ' to play');
+
+
+
+    database.ref().update({turn: turn});
+});
+
+database.ref().child('turn').on('value', function () {
+    console.log('hi');
+});
+
+/*
+set turn
+
+
+
+
+*/
