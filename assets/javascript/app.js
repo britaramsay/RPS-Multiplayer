@@ -24,8 +24,20 @@ var connectionsRef = database.ref('/connections');
 
 var connectedRef = database.ref('.info/connected');
 
+$(document).ready(function (){
+    database.ref().once('value', function (snapshot) {
+        if(!snapshot.hasChild('turn')) {
+            database.ref().set({
+                turn: 1
+            });
+        }
+    });
+});
+
+
 connectedRef.on('value', function(snapshot) {
-  if(snapshot.val()) {
+
+    if(snapshot.val()) {
     var con = connectionsRef.push(true);
     con.onDisconnect().remove();
   }
@@ -50,27 +62,46 @@ $('#submit-name').on('click', function() {
     var playerName = $('#player-name').val().trim();
 
     if(numPlayers < 3) {
-        console.log(numPlayers);
+        $('#player').html('Hello, ' + playerName + '<br>You are player ' + numPlayers);
 
         database.ref('/players/' + numPlayers).set({
             name: playerName,
             wins: 0,
-            losses: 0
+            losses: 0,
+            dateAdded: firebase.database.ServerValue.TIMESTAMP
+            
         });
     }
+      
+     
+
+
+
+    $('#form-panel').hide();
 });
 
 // When a new entry is added to players in firebase
 database.ref("/players").on("value", function(snapshot) {
-    console.log(snapshot.val());
-    // If one person has already entered their name
+    // If no one has entered their name yet
     if (!snapshot.child(1).exists()){
-        // Set numPlayers to 2
+        // Set numPlayers to 1
         numPlayers = 1;
     }
-    else {
-        $('#player-'+numPlayers).html(snapshot.child(numPlayers+'/name').val());
+    else if(numPlayers == 1){
+        $('#name-1').text(snapshot.child(numPlayers+'/name').val());
+        $('#wins-1').text('Wins: ' + snapshot.child(numPlayers+'/wins').val());
+        $('#losses-1').text('Losses: ' + snapshot.child(numPlayers+'/losses').val());
 
+        $('#name-2').text('Waiting for player 2');
+
+
+        
         numPlayers++;
     }
+    else {
+        $('#name-2').text(snapshot.child(numPlayers+'/name').val());
+        $('#wins-2').text('Wins: ' + snapshot.child(numPlayers+'/wins').val());
+        $('#losses-2').text('Losses: ' + snapshot.child(numPlayers+'/losses').val());
+    }
+
 })

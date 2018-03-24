@@ -1,0 +1,21 @@
+#player {
+    text-align: center;
+}
+
+#player-1, #player-2 {
+    float: left;
+    border: 2px solid orangered;
+    margin-right: 15px;
+    text-align: center;
+    padding: 5px;
+    width: 100%;
+}
+
+#player-2 {
+    float: right;
+    margin-right: 0px;
+}
+
+#name-1, #name-2 {
+    font-size: 30px;
+}
