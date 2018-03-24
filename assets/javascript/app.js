@@ -62,7 +62,7 @@ $('#submit-name').on('click', function() {
     event.preventDefault();
 
     var playerName = $('#player-name').val().trim();
-console.log('new: ' + numPlayers);
+
     if(numPlayers < 3) {
         $('#player').html('Hello, ' + playerName + '<br>You are player ' + numPlayers);
 
@@ -74,14 +74,21 @@ console.log('new: ' + numPlayers);
             
         });
         if(numPlayers == 2) {
-            $('#choices-1').html('<p class="choice" id="rock">Rock</p><br><p class="choice" id="paper-1">Paper</p><br><p class="choice" id="scissors">Scissors</p>');
+            $('#choices-1').html('<p class="choice" id="rock">Rock</p><br><p class="choice" id="paper">Paper</p><br><p class="choice" id="scissors">Scissors</p>');
 
             $('#name-2').text('Waiting for player 2');
+            // cal function from here???
+            // if choice????
         }
         else if(numPlayers == 3) {
-            $('#choices-2').html('<p class="choice" id="rock">Rock</p><br><p class="choice" id="paper-1">Paper</p><br><p class="choice" id="scissors">Scissors</p>').hide();
+            $('#choices-2').html('<p class="choice" id="rock">Rock</p><br><p class="choice" id="paper">Paper</p><br><p class="choice" id="scissors">Scissors</p>').hide();
 
             $('#choices-1').text('Waiting for player 1 to play');
+            // if player 1 choice, display button
+            
+            // add event listener for player 1 choice
+            listenForTurn();
+
         }
     }
 
@@ -107,33 +114,39 @@ database.ref("/players").on("value", function(snapshot) {
         $('#wins-2').text('Wins: ' + snapshot.child('2/wins').val());
         $('#losses-2').text('Losses: ' + snapshot.child('2/losses').val());
         numPlayers++;
+
     }
 
 })
 
+function listenForTurn() {
+    database.ref().child('turn').on('value', function (snap) {
+        if(snap.val() == 2){
+        console.log('hiiii');
+        $("#choices-2").show();}
+    });
+}
+
 $('#choices-' + turn).on('click', ".choice", function () {  
-    console.log($(this).attr('id'));
 
     database.ref('/players/' + turn).push({
         choice: $(this).attr('id')
     });
 
-
-    $('#choices-' + turn).hide();
-    
+    $('#choices-' + turn).hide();   
 
     if(turn == 1) turn++;
     else turn--;
     $('#choices-' + turn).html('Waiting for player ' + turn + ' to play');
 
-
-
     database.ref().update({turn: turn});
 });
 
-database.ref().child('turn').on('value', function () {
-    console.log('hi');
-});
+
+
+// click to play
+
+
 
 /*
 set turn
