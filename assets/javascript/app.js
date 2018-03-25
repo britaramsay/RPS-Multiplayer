@@ -87,7 +87,7 @@ $('#submit-name').on('click', function() {
             // if player 1 choice, display button
             
             // add event listener for player 1 choice
-            listenForTurn();
+            listenForTurn(2);
 
         }
     }
@@ -119,11 +119,12 @@ database.ref("/players").on("value", function(snapshot) {
 
 })
 
-function listenForTurn() {
+function listenForTurn(child) {
     database.ref().child('turn').on('value', function (snap) {
         turn = snap.val();
         console.log(turn);
-        $("#choices-" + turn).html('<p class="choice" id="rock">Rock</p><br><p class="choice" id="paper">Paper</p><br><p class="choice" id="scissors">Scissors</p>').show();
+        if(turn == child)
+            $("#choices-" + child).html('<p class="choice" id="rock">Rock</p><br><p class="choice" id="paper">Paper</p><br><p class="choice" id="scissors">Scissors</p>').show();
     });
 
 }
@@ -147,7 +148,7 @@ $('#choices-1').on('click', ".choice", function () {
 
     database.ref().update({turn: turn});
 
-    listenForTurn();
+    listenForTurn(1);
 });
 
 $('#choices-2').on('click', ".choice", function () {  
@@ -167,7 +168,7 @@ $('#choices-2').on('click', ".choice", function () {
 
     database.ref().update({turn: turn});
 
-    listenForTurn();
+    listenForTurn(2);
 });
 
 
