@@ -121,27 +121,54 @@ database.ref("/players").on("value", function(snapshot) {
 
 function listenForTurn() {
     database.ref().child('turn').on('value', function (snap) {
-        if(snap.val() == 2){
-        console.log('hiiii');
-        $("#choices-2").show();}
+        turn = snap.val();
+        console.log(turn);
+        $("#choices-" + turn).html('<p class="choice" id="rock">Rock</p><br><p class="choice" id="paper">Paper</p><br><p class="choice" id="scissors">Scissors</p>').show();
     });
+
 }
 
-$('#choices-' + turn).on('click', ".choice", function () {  
+$('#choices-1').on('click', ".choice", function () {  
 
-    database.ref('/players/' + turn).push({
-        choice: $(this).attr('id')
+    var choice = $(this).attr('id');
+
+    database.ref('/players/' + turn).once('value', function(snapshot) {
+         database.ref('/players/' + turn).update({choice: choice});
+    });
+    
+
+    $('#choices-' + turn).hide();   
+
+    if(turn == 1) turn++;
+    else turn--;
+    console.log(turn);
+
+    $('#choices-' + turn).html('Waiting for player ' + turn + ' to play');
+
+    database.ref().update({turn: turn});
+
+    listenForTurn();
+});
+
+$('#choices-2').on('click', ".choice", function () {  
+
+    var choice = $(this).attr('id');
+    database.ref('/players/' + turn).once('value', function(snapshot) {
+        database.ref('/players/' + turn).update({choice: choice});
     });
 
     $('#choices-' + turn).hide();   
 
     if(turn == 1) turn++;
     else turn--;
+    console.log(turn);
+
     $('#choices-' + turn).html('Waiting for player ' + turn + ' to play');
 
     database.ref().update({turn: turn});
-});
 
+    listenForTurn();
+});
 
 
 // click to play
