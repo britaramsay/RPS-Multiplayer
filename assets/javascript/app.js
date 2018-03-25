@@ -136,7 +136,6 @@ $('#choices-1').on('click', ".choice", function () {
     database.ref('/players/' + turn).once('value', function(snapshot) {
          database.ref('/players/' + turn).update({choice: choice});
     });
-    
 
     $('#choices-' + turn).hide();   
 
@@ -157,6 +156,11 @@ $('#choices-2').on('click', ".choice", function () {
     database.ref('/players/' + turn).once('value', function(snapshot) {
         database.ref('/players/' + turn).update({choice: choice});
     });
+    
+    // Call rock paper scissors here
+    // update winner
+    // on winner change, display
+    rockPaperScissors();
 
     $('#choices-' + turn).hide();   
 
@@ -170,6 +174,44 @@ $('#choices-2').on('click', ".choice", function () {
 
     listenForTurn(2);
 });
+
+function rockPaperScissors() {
+    var choice1,
+        choice2,
+        winner,
+        loser;
+    database.ref('/players/1').once('value', function (snap) {  
+        choice1 = snap.val().choice;
+    });
+    database.ref('/players/2').once('value', function (snap) {  
+        choice2 = snap.val().choice;
+    });
+    if (choice1 == choice2) alert('tie');
+    else if((choice1 == 'paper') && (choice2 == 'scissors')) {winner = 2; loser = 1;alert('player 2');}
+    else if((choice1 == 'rock') && (choice2 == 'paper')) {winner = 2; loser = 1;alert('player 2');}
+    else if((choice1 == 'scissors') && (choice2 == 'rock')) {winner = 2; loser = 1;alert('player 2');}
+    else if((choice1 == 'paper') && (choice2 == 'rock')) {winner = 1; loser = 2;alert('player 1');}
+    else if((choice1 == 'rock') && (choice2 == 'scissors')) {winner = 1; loser = 2;alert('player 1');}
+    else if((choice1 == 'scissors') && (choice2 == 'paper')) {winner = 1; loser = 2;alert('player 1');}
+
+    if (winner == 1) {
+        database.ref('/players/1').update({
+            wins: 1
+        });
+        database.ref('/players/2').update({
+            loses: 1
+        });
+    }
+    else if (winner == 2) {
+        database.ref('/players/2').update({
+            wins: 1
+        });
+        database.ref('/players/1').update({
+            loses: 1
+        });
+    }
+}
+
 
 
 // click to play
