@@ -22,6 +22,33 @@
     font-size: 30px;
 }
 
+.btn {
+    margin: 15px 5px 0px 0px;
+    background-color: rgb(10, 10, 10);
+    color: rgb(218, 216, 216);
+}
+
+.btn:hover, .btn:active, .btn:focus, .btn:visited, .btn:link {
+    color: rgb(10, 10, 10);
+    background-color: rgb(218, 216, 216);
+}
+
 .choice {
     margin-bottom: 5px;
+    color: rgb(10, 10, 10);
+    background-color: rgb(218, 216, 216);
+}
+
+.choice:last-child {
+    margin-bottom: 5px;
+}
+
+.choice:hover, .choice:active, .choice:focus, .choice:visited, .choice:link {
+    background-color: rgb(10, 10, 10);
+    color: rgb(218, 216, 216);
+}
+
+#chatbox p {
+    font-size: 17px;
+    font-weight: 500;
 }

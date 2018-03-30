@@ -32,6 +32,7 @@ var messagesRef = database.ref('/messages');
 
 $(document).ready(function (){
     $('#players').hide();
+    $('#chatbox').hide();
 
     database.ref().once('value', function (snapshot) {
         // If turn is not in database 
@@ -51,7 +52,7 @@ $(document).ready(function (){
 // clear other players wins losses
 
 connectedRef.on('value', function(snapshot) {
-    console.log(player);
+
     if(snapshot.val()) {
         var con = connectionsRef.push(true);
         con.onDisconnect().remove();
@@ -107,7 +108,7 @@ $('#submit-name').on('click', function() {
         else if(numPlayers == 3) {
             $('#choices-2').html('<button class="btn btn-default choice" id="rock">Rock</button><br><button class="btn btn-default choice" id="paper">Paper</button><br><button class="btn btn-default choice" id="scissors">Scissors</button>').hide();
 
-            $('#choices-1').text('Waiting for player 1 to play');
+            $('#turn').text('Waiting for player 1 to play');
 
             player = 2;
             
@@ -161,6 +162,7 @@ database.ref("/players").on("value", function(snapshot) {
         $('#losses-2').text('Losses: ' + snapshot.child('2/losses').val());
         numPlayers++;
 
+        $('#chatbox').show();
     }
 
 })
@@ -169,8 +171,10 @@ function listenForTurn(child) {
     database.ref().child('turn').on('value', function (snap) {
         turn = snap.val();
         console.log(turn);
-        if(turn == child)
+        if(turn == child) {
+            $('#turn').html('');
             $("#choices-" + child).html('<button class="btn btn-default choice" id="rock">Rock</button><br><button class="btn btn-default choice" id="paper">Paper</button><br><button class="btn btn-default choice" id="scissors">Scissors</button>').show();
+        }
     });
     console.log('player: ' + player);
 }
@@ -189,7 +193,7 @@ $('#choices-1').on('click', ".choice", function () {
     else turn--;
     console.log(turn);
 
-    $('#choices-' + turn).html('Waiting for player ' + turn + ' to play');
+    $('#turn').html('Waiting for player ' + turn + ' to play');
 
     database.ref().update({turn: turn});
     
@@ -215,7 +219,7 @@ $('#choices-2').on('click', ".choice", function () {
     else turn--;
     console.log(turn);
 
-    $('#choices-' + turn).html('Waiting for player ' + turn + ' to play');
+    $('#turn').html('Waiting for player ' + turn + ' to play');
 
     database.ref().update({turn: turn});
 
@@ -286,7 +290,6 @@ function displayResults() {
         $('#losses-2').text('Losses: ' + snap.val());
     });
 
-    // Change results display in show options
 }
 
 
