@@ -28,7 +28,11 @@ var connectedRef = database.ref('.info/connected');
 
 var playerRef = database.ref('/players');
 
+var messagesRef = database.ref('/messages');
+
 $(document).ready(function (){
+    $('#players').hide();
+
     database.ref().once('value', function (snapshot) {
         // If turn is not in database 
         if(!snapshot.hasChild('turn')) {
@@ -42,12 +46,23 @@ $(document).ready(function (){
     });
 });
 
+// TODO: pass player number disconnected
+// remove disconnected
+// clear other players wins losses
+
 connectedRef.on('value', function(snapshot) {
     console.log(player);
     if(snapshot.val()) {
         var con = connectionsRef.push(true);
         con.onDisconnect().remove();
+        // Remove all player information
         playerRef.onDisconnect().remove();
+
+        messagesRef.onDisconnect().remove();
+        // Set turn to 1
+        database.ref().onDisconnect().update({
+            turn: 1
+        });
     }
 });
 
@@ -65,9 +80,12 @@ connectionsRef.on("value", function(snap) {
 });
 
 $('#submit-name').on('click', function() {
+    // Prevent page refreshing
     event.preventDefault();
-
+    // Get player name for input
     var playerName = $('#player-name').val().trim();
+    // Show players panel
+    $('#players').show();
 
     if(numPlayers < 3) {
         $('#player').html('Hello, ' + playerName + '<br>You are player ' + numPlayers);
@@ -80,14 +98,14 @@ $('#submit-name').on('click', function() {
             
         });
         if(numPlayers == 2) {
-            $('#choices-1').html('<p class="choice" id="rock">Rock</p><br><p class="choice" id="paper">Paper</p><br><p class="choice" id="scissors">Scissors</p>');
+            $('#choices-1').html('<button class="btn btn-default choice" id="rock">Rock</button><br><button class="btn btn-default choice" id="paper">Paper</button><br><button class="btn btn-default choice" id="scissors">Scissors</button>');
 
             $('#name-2').text('Waiting for player 2');
 
             player = 1;
         }
         else if(numPlayers == 3) {
-            $('#choices-2').html('<p class="choice" id="rock">Rock</p><br><p class="choice" id="paper">Paper</p><br><p class="choice" id="scissors">Scissors</p>').hide();
+            $('#choices-2').html('<button class="btn btn-default choice" id="rock">Rock</button><br><button class="btn btn-default choice" id="paper">Paper</button><br><button class="btn btn-default choice" id="scissors">Scissors</button>').hide();
 
             $('#choices-1').text('Waiting for player 1 to play');
 
@@ -100,6 +118,27 @@ $('#submit-name').on('click', function() {
     }
 
     $('#form-panel').hide();
+});
+
+$('#submit-msg').on('click', function (event) { 
+    event.preventDefault();
+
+    var message = $('#chat-message').val().trim();
+
+    database.ref('/messages').push({
+        sender: player,
+        message: message
+    });
+
+    $('#chat-message').val('');
+});
+
+database.ref('/messages').on('child_added', function (childSnapshot) {  
+    // alert(childSnapshot.val().sender);
+    var msg = $('<div>');
+    msg.html("Player " + childSnapshot.val().sender + ": " + childSnapshot.val().message + "\n");
+    $('#messages').append(msg);
+
 });
 
 // When a new entry is added to players in firebase
@@ -131,7 +170,7 @@ function listenForTurn(child) {
         turn = snap.val();
         console.log(turn);
         if(turn == child)
-            $("#choices-" + child).html('<p class="choice" id="rock">Rock</p><br><p class="choice" id="paper">Paper</p><br><p class="choice" id="scissors">Scissors</p>').show();
+            $("#choices-" + child).html('<button class="btn btn-default choice" id="rock">Rock</button><br><button class="btn btn-default choice" id="paper">Paper</button><br><button class="btn btn-default choice" id="scissors">Scissors</button>').show();
     });
     console.log('player: ' + player);
 }

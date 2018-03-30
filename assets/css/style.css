@@ -4,7 +4,9 @@
 
 #player-1, #player-2 {
     float: left;
-    border: 2px solid orangered;
+    border: 2px solid rgb(59, 59, 59);
+    border-radius: 25px;
+    box-shadow: 5px 5px 10px #888888;
     margin-right: 15px;
     text-align: center;
     padding: 5px;
@@ -18,4 +20,8 @@
 
 #name-1, #name-2 {
     font-size: 30px;
+}
+
+.choice {
+    margin-bottom: 5px;
 }
