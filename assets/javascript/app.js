@@ -283,7 +283,7 @@ function displayResults() {
         $('#wins-2').text('Wins: ' + snap.val());
     });
     database.ref('/players/2').child('losses').on('value', function (snap) {
-        $('#losses-1').text('Losses: ' + snap.val());
+        $('#losses-2').text('Losses: ' + snap.val());
     });
 
     // Change results display in show options
