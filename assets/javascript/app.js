@@ -12,7 +12,8 @@ firebase.initializeApp(config);
 
 var database = firebase.database();
 
-var player1Choice,
+var player,
+    player1Choice,
     player2Choice,
     player1Wins,
     player2Wins,
@@ -25,24 +26,29 @@ var connectionsRef = database.ref('/connections');
 
 var connectedRef = database.ref('.info/connected');
 
+var playerRef = database.ref('/players');
+
 $(document).ready(function (){
     database.ref().once('value', function (snapshot) {
+        // If turn is not in database 
         if(!snapshot.hasChild('turn')) {
+            // Set to 1
             database.ref().set({
                 turn: 1
             });
+            // Set turn variable to 1
             turn = 1;
         }
     });
 });
 
-
 connectedRef.on('value', function(snapshot) {
-
+    console.log(player);
     if(snapshot.val()) {
-    var con = connectionsRef.push(true);
-    con.onDisconnect().remove();
-  }
+        var con = connectionsRef.push(true);
+        con.onDisconnect().remove();
+        playerRef.onDisconnect().remove();
+    }
 });
 
 // When first loaded or when the connections list changes...
@@ -77,16 +83,17 @@ $('#submit-name').on('click', function() {
             $('#choices-1').html('<p class="choice" id="rock">Rock</p><br><p class="choice" id="paper">Paper</p><br><p class="choice" id="scissors">Scissors</p>');
 
             $('#name-2').text('Waiting for player 2');
-            // cal function from here???
-            // if choice????
+
+            player = 1;
         }
         else if(numPlayers == 3) {
             $('#choices-2').html('<p class="choice" id="rock">Rock</p><br><p class="choice" id="paper">Paper</p><br><p class="choice" id="scissors">Scissors</p>').hide();
 
             $('#choices-1').text('Waiting for player 1 to play');
-            // if player 1 choice, display button
+
+            player = 2;
             
-            // add event listener for player 1 choice
+            // add event listener for player 2 choice
             listenForTurn(2);
 
         }
@@ -126,7 +133,7 @@ function listenForTurn(child) {
         if(turn == child)
             $("#choices-" + child).html('<p class="choice" id="rock">Rock</p><br><p class="choice" id="paper">Paper</p><br><p class="choice" id="scissors">Scissors</p>').show();
     });
-
+    console.log('player: ' + player);
 }
 
 $('#choices-1').on('click', ".choice", function () {  
@@ -146,7 +153,8 @@ $('#choices-1').on('click', ".choice", function () {
     $('#choices-' + turn).html('Waiting for player ' + turn + ' to play');
 
     database.ref().update({turn: turn});
-
+    
+    displayResults();
     listenForTurn(1);
 });
 
@@ -179,38 +187,70 @@ function rockPaperScissors() {
     var choice1,
         choice2,
         winner,
-        loser;
+        loser,
+        wins1,
+        wins2,
+        losses1,
+        losses2;
+
     database.ref('/players/1').once('value', function (snap) {  
         choice1 = snap.val().choice;
+        wins1 = snap.val().wins;
+        losses1 = snap.val().losses;
     });
     database.ref('/players/2').once('value', function (snap) {  
         choice2 = snap.val().choice;
+        wins2 = snap.val().wins;
+        losses2 = snap.val().losses;
     });
+
     if (choice1 == choice2) alert('tie');
-    else if((choice1 == 'paper') && (choice2 == 'scissors')) {winner = 2; loser = 1;alert('player 2');}
-    else if((choice1 == 'rock') && (choice2 == 'paper')) {winner = 2; loser = 1;alert('player 2');}
-    else if((choice1 == 'scissors') && (choice2 == 'rock')) {winner = 2; loser = 1;alert('player 2');}
-    else if((choice1 == 'paper') && (choice2 == 'rock')) {winner = 1; loser = 2;alert('player 1');}
-    else if((choice1 == 'rock') && (choice2 == 'scissors')) {winner = 1; loser = 2;alert('player 1');}
-    else if((choice1 == 'scissors') && (choice2 == 'paper')) {winner = 1; loser = 2;alert('player 1');}
+    else if((choice1 == 'paper') && (choice2 == 'scissors'))    {winner = 2; wins2++; losses1++;}
+    else if((choice1 == 'rock') && (choice2 == 'paper'))        {winner = 2; wins2++; losses1++;}
+    else if((choice1 == 'scissors') && (choice2 == 'rock'))     {winner = 2; wins2++; losses1++;}
+    else if((choice1 == 'paper') && (choice2 == 'rock'))        {winner = 1; wins1++; losses2++;}
+    else if((choice1 == 'rock') && (choice2 == 'scissors'))     {winner = 1; wins1++; losses2++;}
+    else if((choice1 == 'scissors') && (choice2 == 'paper'))    {winner = 1; wins1++; losses2++;}
 
     if (winner == 1) {
         database.ref('/players/1').update({
-            wins: 1
+            wins: wins1
         });
         database.ref('/players/2').update({
-            loses: 1
+            losses: losses2
         });
     }
     else if (winner == 2) {
         database.ref('/players/2').update({
-            wins: 1
+            wins: wins2
         });
         database.ref('/players/1').update({
-            loses: 1
+            losses: losses1
         });
     }
+
+    displayResults();
 }
+
+function displayResults() {  
+
+    database.ref('/players/1').child('wins').on('value', function (snap) {
+        $('#wins-1').text('Wins: ' + snap.val());
+    });
+    database.ref('/players/1').child('losses').on('value', function (snap) {
+        $('#losses-1').text('Losses: ' + snap.val());
+    });
+    database.ref('/players/2').child('wins').on('value', function (snap) {
+        $('#wins-2').text('Wins: ' + snap.val());
+    });
+    database.ref('/players/2').child('losses').on('value', function (snap) {
+        $('#losses-1').text('Losses: ' + snap.val());
+    });
+
+    // Change results display in show options
+}
+
+
 
 
 
