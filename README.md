@@ -1,6 +1,6 @@
 # RPS-Multiplayer
 
-This can be viewed [here.](https://britaramsay.github.io/Giphy-API-hw/)
+This can be viewed [here.](https://britaramsay.github.io/RPS-Multiplayer/)
 
 ---
 
