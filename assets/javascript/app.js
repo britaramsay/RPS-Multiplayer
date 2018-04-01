@@ -1,7 +1,7 @@
 // Initialize Firebase
 var config = {
     apiKey: "AIzaSyB_f1ozFigbix5C3GxCElwGTyyckWMSKUU",
-    authDomain: "rpsmultiplayer-45512.firebaseapp.com",
+    // authDomain: "rpsmultiplayer-45512.firebaseapp.com",
     databaseURL: "https://rpsmultiplayer-45512.firebaseio.com",
     projectId: "rpsmultiplayer-45512",
     storageBucket: "",
