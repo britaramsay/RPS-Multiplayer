@@ -1,14 +1,14 @@
 // Initialize Firebase
+// Initialize Firebase
 var config = {
-    apiKey: "AIzaSyC-Gh6ps_PbykKArzReBmlRhRM4QwY_ODU",
-    authDomain: "rock-paper-scissors-988ad.firebaseapp.com",
-    databaseURL: "https://rock-paper-scissors-988ad.firebaseio.com",
-    projectId: "rock-paper-scissors-988ad",
+    apiKey: "AIzaSyB_f1ozFigbix5C3GxCElwGTyyckWMSKUU",
+    authDomain: "rpsmultiplayer-45512.firebaseapp.com",
+    databaseURL: "https://rpsmultiplayer-45512.firebaseio.com",
+    projectId: "rpsmultiplayer-45512",
     storageBucket: "",
-    messagingSenderId: "625561753772"
+    messagingSenderId: "167498076580"
   };
-
-firebase.initializeApp(config);
+  firebase.initializeApp(config);
 
 var database = firebase.database();
 
