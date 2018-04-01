@@ -44,6 +44,12 @@ $(document).ready(function (){
             // Set turn variable to 1
             turn = 1;
         }
+        if(!snapshot.hasChild('ties')) {
+            // Set to 1
+            database.ref().set({
+                ties: 0
+            });
+        }
     });
 });
 
@@ -245,7 +251,8 @@ function rockPaperScissors() {
         wins1,
         wins2,
         losses1,
-        losses2;
+        losses2,
+        ties;
     // Refernce player 1 in the database once
     database.ref('/players/1').once('value', function (snap) {  
         // Save their current choice and current wins/losses
@@ -261,7 +268,17 @@ function rockPaperScissors() {
         losses2 = snap.val().losses;
     });
     // RPS outcomes to decide the winner and loser
-    if (choice1 == choice2) alert('tie');
+    if (choice1 == choice2) {
+        database.ref().once('value', function (snap) {  
+            // Save their current choice and current wins/losses       
+            ties = snap.val().ties;
+            ties++;
+            database.ref().update({
+                ties: ties
+            });
+        });
+        
+    }
     else if((choice1 == 'paper') && (choice2 == 'scissors'))    {winner = 2; wins2++; losses1++;}
     else if((choice1 == 'rock') && (choice2 == 'paper'))        {winner = 2; wins2++; losses1++;}
     else if((choice1 == 'scissors') && (choice2 == 'rock'))     {winner = 2; wins2++; losses1++;}
@@ -306,5 +323,7 @@ function displayResults() {
     database.ref('/players/2').child('losses').on('value', function (snap) {
         $('#losses-2').text('Losses: ' + snap.val());
     });
-
+    database.ref().child('ties').on('value', function (snap) {
+        $('#ties').text('Ties: ' + snap.val());
+    });
 }
