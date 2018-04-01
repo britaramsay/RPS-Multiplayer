@@ -68,7 +68,8 @@ connectedRef.on('value', function(snapshot) {
         messagesRef.onDisconnect().remove();
         // Set turn to 1
         database.ref().onDisconnect().update({
-            turn: 1
+            turn: 1,
+            ties: 0
         });
     }
 });
