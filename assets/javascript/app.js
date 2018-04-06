@@ -95,28 +95,16 @@ $('#submit-name').on('click', function() {
     // Show players panel
     $('#players').show();
     // Only add if their are 2 players or less
-    if(numPlayers < 3) {
-        // Grett player
-        $('#player').html('Hello, ' + playerName + '<br>You are player ' + numPlayers);
-        // Set player name under the correct number
-        database.ref('/players/' + numPlayers).set({
-            name: playerName,
-            wins: 0,
-            losses: 0,
-            dateAdded: firebase.database.ServerValue.TIMESTAMP
-        });
-        // This is actually player 1
-        if(numPlayers == 2) {
-            // Update their RPS choices
-            $('#choices-1').html('<button class="btn btn-default choice" id="rock">Rock</button><br><button class="btn btn-default choice" id="paper">Paper</button><br><button class="btn btn-default choice" id="scissors">Scissors</button>');
+    database.ref("/players").once("value", function(snapshot) {
+        if(snapshot.child(1).exists()) {
+            database.ref('/players/2').set({
+                name: playerName,
+                wins: 0,
+                losses: 0,
+                dateAdded: firebase.database.ServerValue.TIMESTAMP
+            });
+            $('#player').html('Hello, ' + playerName + '<br>You are player 2');
 
-            $('#name-2').text('Waiting for player 2');
-            // Set player variable to 1
-            player = 1;
-        }
-        // This is only player 2
-        else if(numPlayers == 3) {
-            // Set their choices but hide them until their turn
             $('#choices-2').html('<button class="btn btn-default choice" id="rock">Rock</button><br><button class="btn btn-default choice" id="paper">Paper</button><br><button class="btn btn-default choice" id="scissors">Scissors</button>').hide();
 
             $('#turn').text('Waiting for player 1 to play');
@@ -125,7 +113,71 @@ $('#submit-name').on('click', function() {
             // add event listener for player 2 choice
             listenForTurn(2);
         }
-    }
+        else if(snapshot.val() == null) {
+
+            // Grett player
+            $('#player').html('Hello, ' + playerName + '<br>You are player 1');
+            // Set player name under the correct number
+            database.ref('/players/1').set({
+                name: playerName,
+                wins: 0,
+                losses: 0,
+                dateAdded: firebase.database.ServerValue.TIMESTAMP
+            });
+            $('#choices-1').html('<button class="btn btn-default choice" id="rock">Rock</button><br><button class="btn btn-default choice" id="paper">Paper</button><br><button class="btn btn-default choice" id="scissors">Scissors</button>').hide();
+            $('#name-1').text(playerName);
+
+            $('#name-2').text('Waiting for player 2');
+            // Set player variable to 1
+            player = 1;
+
+            database.ref('/players/').on('value', function(snap){
+                if(snap.child(2).exists){
+                    $('#choices-1').show();
+                    // $('#name-1').text(snapshot.child('1/name').val());
+                    // $('#wins-1').text('Wins: ' + snapshot.child('1/wins').val());
+                    // $('#losses-1').text('Losses: ' + snapshot.child('1/losses').val());
+                }
+            });
+        }
+        
+        
+    
+    
+    });
+    // if(numPlayers < 3) {
+    //     // // Grett player
+    //     // $('#player').html('Hello, ' + playerName + '<br>You are player ' + numPlayers);
+    //     // // Set player name under the correct number
+    //     // database.ref('/players/' + numPlayers).set({
+    //     //     name: playerName,
+    //     //     wins: 0,
+    //     //     losses: 0,
+    //     //     dateAdded: firebase.database.ServerValue.TIMESTAMP
+    //     // });
+    //     // This is actually player 1
+    //     if(numPlayers == 2) {
+    //         // Update their RPS choices
+    //         $('#choices-1').html('<button class="btn btn-default choice" id="rock">Rock</button><br><button class="btn btn-default choice" id="paper">Paper</button><br><button class="btn btn-default choice" id="scissors">Scissors</button>').hide();
+
+    //         $('#name-2').text('Waiting for player 2');
+    //         // Set player variable to 1
+    //         player = 1;
+
+    //         checkPlayers();
+    //     }
+    //     // This is only player 2
+    //     else if(numPlayers == 3) {
+    //         // Set their choices but hide them until their turn
+    //         $('#choices-2').html('<button class="btn btn-default choice" id="rock">Rock</button><br><button class="btn btn-default choice" id="paper">Paper</button><br><button class="btn btn-default choice" id="scissors">Scissors</button>').hide();
+
+    //         $('#turn').text('Waiting for player 1 to play');
+    //         // Set player to 2
+    //         player = 2;
+    //         // add event listener for player 2 choice
+    //         listenForTurn(2);
+    //     }
+    // }
     // Hide enter name panel
     $('#form-panel').hide();
 });
@@ -152,16 +204,17 @@ database.ref('/messages').on('child_added', function (childSnapshot) {
     // Append to messages
     $('#messages').append(msg);
 });
-
 // When a new entry is added to players in firebase
 database.ref("/players").on("value", function(snapshot) {
+
+    console.log(snapshot.val());
     // If no one has entered their name yet
-    if (!snapshot.child(1).exists()){
-        // Set numPlayers to 1
-        numPlayers = 1;
-    }
+    // if (!snapshot.child(1).exists()){
+    //     // Set numPlayers to 1
+    //     numPlayers = 1;
+    // }
     // If only one player exists
-    else if(snapshot.child(1).exists() && !snapshot.child(2).exists()){
+    if(snapshot.child(1).exists() && !snapshot.child(2).exists()){
         // Set divs based on player 1 data
         $('#name-1').text(snapshot.child('1/name').val());
         $('#wins-1').text('Wins: ' + snapshot.child('1/wins').val());
@@ -184,6 +237,7 @@ database.ref("/players").on("value", function(snapshot) {
 })
 // Tells a player when it is their turn
 function listenForTurn(child) {
+   
     // When the value of turn changes
     database.ref().child('turn').on('value', function (snap) {
         // If variable turn matches turn in the database
